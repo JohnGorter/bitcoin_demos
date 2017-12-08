@@ -1,41 +1,79 @@
-var oldy = 25;
+var currentprice = 25;
 var buyprice = 0;
 var amount = 0;
+var index=0;
 var wallet = 100.0;
 updateWallet();
 
+document.querySelector("#sell").hidden = !navigator.onLine;
+document.querySelector("#buy").hidden = !navigator.onLine;
+
+window.addEventListener("online", () => {
+    document.querySelector("#sell").hidden = false;
+    document.querySelector("#buy").hidden = false;
+});
+window.addEventListener("offline", () => {
+    document.querySelector("#sell").hidden = true;
+    document.querySelector("#buy").hidden = true;
+    
+});
+
+
 window.onload = function () {
+    if (window.localStorage["bitcoinwallet"]) {
+        var walletdata = JSON.parse(window.localStorage["bitcoinwallet"]);
+        wallet = walletdata.wallet;
+        amount = walletdata.amount;
+        updateWallet();
+    }
+
     var chart = new CanvasJS.Chart("chartContainer", { 
         title: {  text: "Bitcoin koers" },
-        data: [ { type: "spline", dataPoints: [] } ]
+        axisX:{
+            gridThickness: 1       
+          },
+          axisY:{        
+            gridThickness: 1,
+            interlacedColor: "azure",
+            tickColor: "azure",
+            titleFontColor: "rgb(0,75,141)",
+          },
+        data: [ { type: "area",
+                  color: "rgba(12,143,221,.7)",dataPoints: [] }],
     });
-    chart.render();	
-    window.setInterval(() => {
-        var length = chart.options.data[0].dataPoints.length;
-        chart.options.title.text = "New DataPoint Added at the end";
-        var percent = Math.floor(Math.random() * 21) - 10;
-        var newy = oldy + (oldy * percent / 100);
-        oldy = newy;
-        chart.options.data[0].dataPoints.push({ y: newy});
-        chart.render();
-    }, 1000);
+
+    chart.render();
+    var socket = io('http://bitcoindemo.azurewebsites.net/');
+    socket.on('stockdata', (data) => {
+          console.log(data);
+          chart.options.title.text = "BITCOIN";
+          currentprice = data.value;
+          chart.options.data[0].dataPoints.push({ x: index++, y: currentprice});    // add the new value to the right
+           if (chart.options.data[0].dataPoints.length > 10){
+               chart.options.data[0].dataPoints.shift();        // remove the first left value
+           }
+          chart.render();
+          
+    });
 };
 
 document.querySelector("#buy").addEventListener('click', () =>{
-    buyprice = oldy;
+    buyprice = currentprice;
     var buyamount = parseInt(document.querySelector("#amount").value);
     var total =  buyamount * buyprice;
     document.querySelector("#loglist").innerHTML += `<li>buy total ${total.toFixed(2)} at price ${buyprice.toFixed(2)}</li>`;
     wallet -= total;
     amount += buyamount;
+    window.localStorage["bitcoinwallet"] = JSON.stringify({ amount:amount, wallet:wallet});
     updateWallet();
 });
 document.querySelector("#sell").addEventListener('click', () =>{
     var sellamount = parseInt(document.querySelector("#amount").value);
-    var total = oldy * sellamount;
-    document.querySelector("#loglist").innerHTML += `<li>sell total ${total.toFixed(2)} at price ${oldy.toFixed(2)}</li>`;
+    var total = currentprice * sellamount;
+    document.querySelector("#loglist").innerHTML += `<li>sell total ${total.toFixed(2)} at price ${currentprice.toFixed(2)}</li>`;
     wallet += total;
     amount -= sellamount;
+    window.localStorage["bitcoinwallet"] = JSON.stringify({ amount:amount, wallet:wallet});
     updateWallet();
 }); 
 
@@ -62,4 +100,33 @@ function login(){
             document.querySelector("#log").classList.remove("start");
         }
     }, 50); 
+}
+
+function getCash(){
+    var reader = new FileReader();
+    reader.onload = (e) =>{
+        var cash = JSON.parse(e.target.result);
+        wallet += parseInt(cash.wallet);
+        amount += parseInt(cash.amount);
+        updateWallet();
+    };
+    reader.readAsText(event.dataTransfer.files[0]);
+    prevent(); 
+}
+
+function prevent(){
+    event.preventDefault();
+    event.stopPropagation();
+}
+
+function downloadWallet(){
+    var newBlob = new Blob([JSON.stringify({wallet:wallet, amount:amount})], {type: "application/json"})
+    var a = document.createElement("a");
+    a.download = "wallet.txt";
+    var data =  window.URL.createObjectURL(newBlob);
+    a.href = data;
+    a.click(); 
+    setTimeout(function(){
+        window.URL.revokeObjectURL(data);
+    }, 100);
 }

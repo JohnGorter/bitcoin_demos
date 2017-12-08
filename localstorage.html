@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+     naam:   <input type="Text" name="name" id="name">
+     <button onclick="save()">save</button>
+    <span id="user"></span>
+     <script>
+         var username = "";
+         if (localStorage["username"]){
+            username = localStorage["username"]; 
+            document.querySelector("#user").innerHTML = username;
+         }
+
+
+         function save(){
+             var user = document.querySelector("#name").value;
+             localStorage["username"] = user;
+            document.querySelector("#user").innerHTML = user;
+
+            navigator.geolocation.getCurrentPosition((coords) => {
+                var long = coords.coords.longitude;
+                var lat = coords.coords.latitude;
+                fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=AIzaSyB8JA7YNqrmhrz2naFmEokekqrZHhzxhvs`).then(data => data.json()).then(dataobject => console.log(dataobject));
+
+            });
+             
+         }
+     </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+    "name": "Bitcoinapp",
+    "theme_color": "#F4751E",
+    "start_url": "/",
+    "display": "standalone",
+    "short_name": "BCA",
+    "background_color": "#fff",
+    "description": "Bitcoin stuff",
+    "icons": [{
+      "src": "bitcoin.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }]
+  }

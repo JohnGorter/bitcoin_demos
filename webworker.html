@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+    <img src="bitcoin.jpg" style="height:200px">
+    <script>
+    function urlB64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) 
+            outputArray[i] = rawData.charCodeAt(i);
+        return outputArray;
+    }
+
+    navigator.serviceWorker.register('/sw.js').then(function(swReg) {
+        swReg.pushManager.getSubscription()
+        .then(function(subscription) {
+            if (subscription) {
+            console.log('User IS subscribed.', JSON.stringify(subscription));
+            } else {
+            swReg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey:  urlB64ToUint8Array('BDfRI75FpGG8jl6MCMu578TP024VYgnW_0rUyBXgl375aNVbnxuaCjJ6ahPtXaSLfPDzDRSiiGJMFwTCfKWA0x4')
+            }).then(function(subscription) {
+                isSubscribed = true;
+                console.log('subscription', JSON.stringify(subscription));
+            });
+            }
+        });
+    })
+    </script>
+</body>
+</html>
