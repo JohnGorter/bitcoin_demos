@@ -4,15 +4,10 @@
         <title></title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="css/style.css" rel="stylesheet">
+        <link href="styles.css" rel="stylesheet">
         <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script> 
+        <link href="https://fonts.googleapis.com/css?family=Indie+Flower" rel="stylesheet">
     </head>
-    <style>
-        #container { display:flex;}
-        .error { color:red }
-        .block { width:300px; min-height:30px; border:2px solid black;margin:10px;padding:10px;}
-        .chart { flex:1}
-    </style>
     <body>
         <div id="container">
             <div class="block" id="login">
@@ -29,75 +24,22 @@
                     <h1>Welkom <span id="usernamespan"></span></h1>
                 </div>
             </div>
-            <div class="block chart" id="chart" hidden>
+            <div class="block start chart" id="chart" hidden>
                 <div id="chartContainer" style="width:100%; height:280px"></div>  
             </div>
-            <div class="block" id="wallet" hidden>
-                amount:<input type="number" placeholder="amount" id="amount"> <button id="buy">buy</button>
+            <div class="block start" id="wallet" hidden>
+                amount:<input type="number" placeholder="amount" id="amount"> <br/>
+                <button id="buy">buy</button>
                 <button id="sell">sell</button> <br/><br/>
-                <div>Uw tegoed: EUR:<span id="wallet_amount"></span></div>
-                <div>In portfolio: <span id="portfolio"></span></div>
+                <div>Uw tegoed: <br/>EUR:<span class="strong" id="wallet_amount"></span></div>
+                <div>In portfolio: <br/><span class="strong" id="portfolio"></span></div>
+            </div>
+            <div class="block start" id="log" hidden>
+                <h1>transactions</h1>
+                <ul id="loglist">
+                </ul>
             </div>
         </div>
-    
-        <script type="text/javascript">
-            var oldy = 25;
-            var buyprice = 0;
-            var amount = 0;
-            var wallet = 100.0;
-            updateWallet();
-
-            window.onload = function () {
-                var chart = new CanvasJS.Chart("chartContainer", { 
-                    title: {  text: "Bitcoin koers" },
-                    data: [ { type: "spline", dataPoints: [] } ]
-                });
-                chart.render();	
-                window.setInterval(() => {
-                    var length = chart.options.data[0].dataPoints.length;
-                    chart.options.title.text = "New DataPoint Added at the end";
-                    var percent = Math.floor(Math.random() * 21) - 10;
-                    var newy = oldy + (oldy * percent / 100);
-                    oldy = newy;
-                    chart.options.data[0].dataPoints.push({ y: newy});
-                    chart.render();
-                }, 1000);
-            };
-
-            document.querySelector("#buy").addEventListener('click', () =>{
-                buyprice = oldy;
-                var buyamount = parseInt(document.querySelector("#amount").value);
-                var total =  buyamount * buyprice;
-                console.log('buy total', total, 'at price', buyprice);
-                wallet -= total;
-                amount += buyamount;
-                updateWallet();
-            });
-            document.querySelector("#sell").addEventListener('click', () =>{
-                var sellamount = parseInt(document.querySelector("#amount").value);
-                var total = oldy * sellamount;
-                console.log('sell total', total, 'at price', oldy);
-                wallet += total;
-                amount -= sellamount;
-                updateWallet();
-            }); 
-
-            function updateWallet(){
-                document.querySelector("#wallet_amount").innerText = wallet.toFixed(2);
-                document.querySelector("#portfolio").innerText = `${amount} bitcoin`;
-                document.querySelector("#sell").disabled = !amount;
-            }
-
-            function login(){
-                var pwd = document.querySelector("#password").value;
-                document.querySelector("#loginform").hidden = (pwd == "secret");
-                document.querySelector("#logindisplay").hidden = (pwd != "secret");
-                document.querySelector("#loginerror").hidden = (pwd == "secret");
-                document.querySelector("#chart").hidden = (pwd != "secret");
-                document.querySelector("#wallet").hidden = (pwd != "secret");
-                document.querySelector("#usernamespan").innerText = document.querySelector("#username").value;
-            }
-            </script>
-
     </body>
+    <script type="text/javascript" src="main.js"></script> 
 </html>
